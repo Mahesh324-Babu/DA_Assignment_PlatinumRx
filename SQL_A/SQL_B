@@ -1,0 +1,50 @@
+//Revenue from each sales channel (2021)
+SELECT sales_channel,
+       SUM(amount) AS total_revenue
+FROM clinic_sales
+WHERE datetime >= '2021-01-01'
+AND datetime < '2022-01-01'
+GROUP BY sales_channel;
+
+//Top 10 customers (2021)
+SELECT uid,
+       SUM(amount) AS total_spent
+FROM clinic_sales
+WHERE datetime >= '2021-01-01'
+AND datetime < '2022-01-01'
+GROUP BY uid
+ORDER BY total_spent DESC
+LIMIT 10;
+
+//Most profitable clinic per city (May 2021)
+SELECT c.city, t.cid, t.profit
+FROM
+(
+    SELECT cs.cid,
+           SUM(cs.amount) - IFNULL(SUM(e.amount),0) AS profit
+    FROM clinic_sales cs
+    LEFT JOIN expenses e 
+    ON cs.cid = e.cid
+    AND e.datetime >= '2021-05-01'
+    AND e.datetime < '2021-06-01'
+    WHERE cs.datetime >= '2021-05-01'
+    AND cs.datetime < '2021-06-01'
+    GROUP BY cs.cid
+) t
+JOIN clinics c ON t.cid = c.cid
+WHERE t.profit = (
+    SELECT MAX(profit)
+    FROM
+    (
+        SELECT cs.cid,
+               SUM(cs.amount) - IFNULL(SUM(e.amount),0) AS profit
+        FROM clinic_sales cs
+        LEFT JOIN expenses e 
+        ON cs.cid = e.cid
+        AND e.datetime >= '2021-05-01'
+        AND e.datetime < '2021-06-01'
+        WHERE cs.datetime >= '2021-05-01'
+        AND cs.datetime < '2021-06-01'
+        GROUP BY cs.cid
+    ) x
+);

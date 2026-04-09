@@ -1,0 +1,29 @@
+//Last booked room Q1
+SELECT b.user_id, b.room_no
+FROM bookings b
+WHERE booking_date = (
+    SELECT MAX(booking_date)
+    FROM bookings
+    WHERE user_id = b.user_id
+);
+
+Q2//Booking_id & total billing (November 2021)
+
+SELECT bc.booking_id,
+       SUM(bc.item_quantity * i.item_rate) AS total_amount
+FROM booking_commercials bc, items i
+WHERE bc.item_id = i.item_id
+AND bc.bill_date >= '2021-11-01'
+AND bc.bill_date < '2021-12-01'
+GROUP BY bc.booking_id;
+
+Q3//Bills in October 2021 with amount > 1000
+
+SELECT bc.bill_id,
+       SUM(bc.item_quantity * i.item_rate) AS total_amount
+FROM booking_commercials bc, items i
+WHERE bc.item_id = i.item_id
+AND bc.bill_date >= '2021-10-01'
+AND bc.bill_date < '2021-11-01'
+GROUP BY bc.bill_id
+HAVING SUM(bc.item_quantity * i.item_rate) > 1000;
